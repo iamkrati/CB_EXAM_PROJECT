@@ -107,7 +107,7 @@ app.all('*', (req, res) => {
     res.render('error', { err: 'You are requesting a wrong url!!!' })
 });
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3200;
 
 app.listen(port, () => {
     console.log(`server running at port ${port}`);
