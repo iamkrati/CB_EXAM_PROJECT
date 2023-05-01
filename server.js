@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV != "production") {
+    require("dotenv").config({ path: "./config.env" })
+} 
+
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -24,7 +28,7 @@ const orderRoutes = require('./routes/order');
 const productApis = require('./routes/api/productapi');
 
 
-const dbUrl = process.env.dbUrl || 'mongodb://localhost:27017/shopping-app'
+const dbUrl = process.env.DB_URI ;
 
 mongoose.connect(dbUrl)
     .then(() => console.log('MongoDB Connected'))
@@ -38,10 +42,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(mongoSanitize());
-app.use(helmet({contentSecurityPolicy:false}));
+app.use(helmet({ contentSecurityPolicy: false }));
 
 
-const secret = process.env.SECRET || 'weneedsomebettersecret';
+const secret = process.env.SESSION_SECRET;
 
 
 const store = MongoStore.create({
@@ -53,13 +57,13 @@ const store = MongoStore.create({
 
 const sessionConfig = {
     store,
-    name:'session',
+    name: 'session',
     secret: secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
-        expires: Date.now() + 1000* 60 * 60 * 24 * 7 * 1,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7 * 1,
         maxAge: 1000 * 60 * 60 * 24 * 7 * 1,
     }
 }
@@ -77,7 +81,7 @@ passport.deserializeUser(User.deserializeUser());
 
 
 //Telling the passport to check for username and password using authenticate method provided by the passport-local-mongoose package
-passport.use(new LocalStrategy(User.authenticate())); 
+passport.use(new LocalStrategy(User.authenticate()));
 
 app.use((req, res, next) => {
     res.locals.currentUser = req.user;
@@ -93,21 +97,21 @@ app.get('/', (req, res) => {
 });
 
 
-app.use('/products',productRoutes);
+app.use('/products', productRoutes);
 app.use(reviewRoutes);
 app.use(authRoutes);
-app.use('/product',productApis);
-app.use('/user',cartRoutes);
+app.use('/product', productApis);
+app.use('/user', cartRoutes);
 app.use(paymentRoutes);
 app.use(orderRoutes);
 
 
 app.all('*', (req, res) => {
-   
+
     res.render('error', { err: 'You are requesting a wrong url!!!' })
 });
 
-const port = process.env.PORT || 3200;
+const port = process.env.PORT ;
 
 app.listen(port, () => {
     console.log(`server running at port ${port}`);
